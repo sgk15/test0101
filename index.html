@@ -167,6 +167,7 @@
   .swatch:hover{transform:translateY(-1px); box-shadow:var(--shadow-card);}
   .swatch:active{transform:translateY(0);}
   .swatch .chip{
+    display:block;
     height:64px; width:100%;
     background-image:
       linear-gradient(var(--chip-color), var(--chip-color)),
@@ -545,31 +546,6 @@
 
   function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
-  /* ---------------- luminance-aware label color ---------------- */
-  function hexToRgb(hex){
-    var m = hex.match(/^#([0-9a-f]{6})$/i);
-    if(!m) return null;
-    var n = parseInt(m[1],16);
-    return [(n>>16)&255, (n>>8)&255, n&255];
-  }
-  function rgbaToRgb(str){
-    var m = str.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i);
-    if(!m) return null;
-    return [+m[1], +m[2], +m[3]];
-  }
-  function luminance(rgb){
-    var srgb = rgb.map(function(v){
-      v/=255;
-      return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4);
-    });
-    return 0.2126*srgb[0]+0.7152*srgb[1]+0.0722*srgb[2];
-  }
-  function labelColorFor(colorStr){
-    var rgb = colorStr.charAt(0)==="#" ? hexToRgb(colorStr) : rgbaToRgb(colorStr);
-    if(!rgb) return "#000000";
-    return luminance(rgb) > 0.5 ? "rgba(0,0,0,0.72)" : "rgba(255,255,255,0.92)";
-  }
-
   /* ---------------- copy to clipboard ---------------- */
   function copy(text, flashEl){
     if(navigator.clipboard && navigator.clipboard.writeText){
@@ -649,15 +625,6 @@
     });
 
     semMount.appendChild(block);
-  });
-
-  /* set readable label color on every chip via CSS var, based on computed luminance */
-  document.querySelectorAll(".swatch, .tok-row .dot").forEach(function(el){
-    var raw = el.style.getPropertyValue("--chip-color");
-    if(!raw) return;
-    if(el.classList.contains("swatch")){
-      el.querySelector(".name") && (el.querySelector(".name").style.color = labelColorFor(raw));
-    }
   });
 
   /* ---------------- render typography specimens ---------------- */
